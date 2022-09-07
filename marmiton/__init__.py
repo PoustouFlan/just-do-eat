@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 
 import re
+import json
 
 
 class RecipeNotFound(Exception):
@@ -28,36 +29,12 @@ class Marmiton(object):
 		'rct': 0 | 1  (without cook: 1)
 		'sort': "markdesc" (rate) | "popularitydesc" (popularity) | "" (empty for relevance)
 		"""
-		base_url = "http://www.marmiton.org/recettes/recherche.aspx?"
+		base_url = "https://www.marmiton.org/recettes/recherche.aspx?"
 		query_url = urllib.parse.urlencode(query_dict)
-
 		url = base_url + query_url
-
 		html_content = urllib.request.urlopen(url).read()
-		soup = BeautifulSoup(html_content, 'html.parser')
-
-		search_data = []
-
-		articles = soup.findAll("div", {"class": "recipe-card"})
-
-		iterarticles = iter(articles)
-		for article in iterarticles:
-			data = {}
-			try:
-				data["name"] = article.find("h4", {"class": "recipe-card__title"}).get_text().strip(' \t\n\r')
-				data["description"] = article.find("div", {"class": "recipe-card__description"}).get_text().strip(' \t\n\r')
-				data["url"] = article.find("a", {"class": "recipe-card-link"})['href']
-				data["rate"] = article.find("span", {"class": "recipe-card__rating__value"}).text.strip(' \t\n\r')
-				try:
-					data["image"] = article.find('img')['src']
-				except Exception as e1:
-					pass
-			except Exception as e2:
-				pass
-			if data:
-				search_data.append(data)
-
-		return search_data
+		soup = BeautifulSoup(html_content, 'html.parser')		
+		return json.loads(soup.find('script', type='application/json').string)
 
 	@staticmethod
 	def __clean_text(element):
