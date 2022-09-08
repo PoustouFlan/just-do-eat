@@ -1,24 +1,27 @@
 from marmiton import Marmiton
-from pickle import dump
+from pickle import load, dump
+from os import system
 
 class Justdoeat(object):
 
     @staticmethod
-    def get_recipes(n):
-        save = {}
+    def get_recipes(n = float('inf')):
         i = 0
         for recipe in Marmiton.all_recipe():
             i += 1
             ingredients = list(Marmiton.ingredients(recipe))
-            save[recipe['url']] = ingredients
-            print(round(100*i/n, 2), '%')
+            yield (recipe['url'], ingredients)
             if i >= n:
                 break
-        return save
 
     @staticmethod
     def save_recipes(filename, n = float('inf')):
-        save = Justdoeat.get_recipes(n)
-        dump(save, open(filename, 'wb'))
-
+        for url, ingredients in Justdoeat.get_recipes(n):
+            system(f"cp {filename} {filename}.back")
+            try:
+                save = load(open(filename, 'rb'))
+            except FileNotFoundError:
+                save = {}
+            save[url] = ingredients
+            dump(save, open(filename, 'wb'))
 
