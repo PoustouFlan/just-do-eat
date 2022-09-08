@@ -71,3 +71,33 @@ class Justdoeat(object):
             yield url
             indices.add(url)
 
+    @staticmethod
+    def minimum_buy(save, ingredients, k=1):
+        """
+        Yields k differents recipes which needs a fairly small amount of
+        ingredients to buy.
+        Note : this is equivalent to the "Minimum K-Union" problem, which is
+        NP-Complete, so the solution cannot be proven to be optimal.
+        """
+        bought = []
+        done = set()
+        for _ in range(k):
+            best = None
+            cost = float('inf')
+            for url, using in save.items():
+                if url in done:
+                    continue
+                this_cost = 0
+                for ingredient in using:
+                    if ingredient not in ingredients and ingredient not in bought:
+                        this_cost += 1
+                if this_cost < cost:
+                    cost = this_cost
+                    best = url
+            yield best
+            done.add(best)
+            for ingredient in save[best]:
+                if ingredient not in ingredients and ingredient not in bought:
+                    bought.append(ingredient)
+        
+

@@ -40,3 +40,9 @@ print("Toutes les recettes qui utilisent chacun de ces ingrédients:",
         ', '.join(ingredients))
 for url in Justdoeat.uses(save, ingredients):
     print(Marmiton.title_of_url(url))
+
+print("10 recettes qui ne nécessiteeraient pas beaucoup d'achats"
+        " supplémentaires")
+for url in Justdoeat.minimum_buy(save, ingredients, 10):
+    print(Marmiton.title_of_url(url))
+print()
