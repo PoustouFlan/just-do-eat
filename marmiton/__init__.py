@@ -17,6 +17,9 @@ class Marmiton(object):
 
     @staticmethod
     def get(url):
+        """
+        Get json from Marmiton url
+        """
         try:
             html_content = urllib.request.urlopen(url).read()
         except urllib.error.httperror as e:
@@ -89,6 +92,9 @@ class Marmiton(object):
 
     @staticmethod
     def all_recipe():
+        """
+        Get every existing Marmiton recipes
+        """
         i = 0
         done = False
         while not done:
