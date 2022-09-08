@@ -2,10 +2,10 @@ from justdoeat import Justdoeat
 from marmiton import Marmiton
 
 save = Justdoeat.load("data/save.p")
-save = Justdoeat.filter(save, isVegan=True)
+filtered = Justdoeat.filter(save, isVegan=True)
 
-print("3 recettes aléatoires :")
-for url in Justdoeat.random_recipes(save, 3):
+print("3 recettes végan aléatoires :")
+for url in Justdoeat.random_recipes(filtered, 3):
     print(Marmiton.title_of_url(url))
 print()
 
@@ -26,7 +26,7 @@ ingredients = (
     'pomme de terre',
     'crème',
 )
-print("Toutes les recettes que vous pouvez faire en n'utilisant seulement ces"
+print("Toutes les recettes que vous pouvez faire en utilisant seulement ces"
       " ingrédients:", ', '.join(ingredients))
 for url in Justdoeat.uses_only(save, ingredients):
     print(Marmiton.title_of_url(url))
@@ -43,7 +43,8 @@ for url in Justdoeat.uses(save, ingredients):
     print(Marmiton.title_of_url(url))
 print()
 
-print("7 recettes qui ne nécessiteraient pas beaucoup d'achats"
+filtered = Justdoeat.filter(save, isPorkFree=True)
+print("7 recettes sans porc qui ne nécessiteraient pas beaucoup d'achats"
         " supplémentaires")
 for url in Justdoeat.minimum_buy(save, ingredients, 7):
     print(Marmiton.title_of_url(url))

@@ -35,8 +35,8 @@ class Justdoeat(object):
         """
         Yields every recipes that uses only some ingredients
         """
-        for url, using in save.items():
-            for ingredient in using:
+        for url, recipe in save.items():
+            for ingredient in recipe['ingredients']:
                 if ingredient not in ingredients:
                     break
             else:
@@ -47,9 +47,9 @@ class Justdoeat(object):
         """
         Yields every recipes that uses each of the required ingredients
         """
-        for url, using in save.items():
+        for url, recipe in save.items():
             for ingredient in ingredients:
-                if ingredient not in using:
+                if ingredient not in recipe['ingredients']:
                     break
             else:
                 yield url
@@ -83,9 +83,10 @@ class Justdoeat(object):
         for _ in range(k):
             best = None
             cost = float('inf')
-            for url, using in save.items():
+            for url, recipe in save.items():
                 if url in done:
                     continue
+                using = recipe['ingredients']
                 this_cost = 0
                 for ingredient in using:
                     if ingredient not in ingredients and ingredient not in bought:
