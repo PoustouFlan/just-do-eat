@@ -119,6 +119,7 @@ class Marmiton(object):
         while not done:
             done = True
             i += 1
+            print(i)
             uri = f"?type=platprincipal&page={i}"
             for url in Marmiton.recipes_url(uri):
                 done = False
