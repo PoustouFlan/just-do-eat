@@ -22,7 +22,7 @@ class Marmiton(object):
         """
         try:
             html_content = urllib.request.urlopen(url).read()
-        except urllib.error.httperror as e:
+        except urllib.error.HTTPError as e:
             raise RecipeNotFound if e.code == 404 else e
         soup = BeautifulSoup(html_content, 'html.parser')        
         return json.loads(soup.find('script', type='application/json').string)
@@ -42,9 +42,17 @@ class Marmiton(object):
         'sort': "markdesc" (rate) | "popularitydesc" (popularity) | "" (empty for relevance)
         """
         base_url = "https://www.marmiton.org/recettes/recherche.aspx?"
-        query_url = urllib.parse.urlencode(query_dict)
-        url = base_url + query_url
-        return Marmiton.get(url)
+        page = 1
+        while True:
+            query_dict["page"] = page
+            query_url = urllib.parse.urlencode(query_dict)
+            url = base_url + query_url
+            try:
+                query_result = Marmiton.get(url)
+            except RecipeNotFound:
+                break
+            yield from Marmiton.extract_recipes(query_result)
+            page += 1
 
     @staticmethod
     def ingredients(recipe):
@@ -53,7 +61,7 @@ class Marmiton(object):
         """
         for ingredientGroup in recipe['ingredientGroups']:
             for ingredient in ingredientGroup['items']:
-                yield ingredient['token']
+                yield ingredient['name']
         
 
     @staticmethod
