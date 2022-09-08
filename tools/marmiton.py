@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 
 import re
+from rich.progress import track
 import json
 from time import sleep
 
@@ -15,7 +16,6 @@ class RecipeNotFound(Exception):
 
 
 class Marmiton(object):
-
     @staticmethod
     def get(url):
         """
@@ -30,8 +30,8 @@ class Marmiton(object):
                 raise RecipeNotFound if e.code == 404 else e
             except urllib.error.URLError:
                 sleep(10)
-        soup = BeautifulSoup(html_content, 'html.parser')        
-        return json.loads(soup.find('script', type='application/json').string)
+        soup = BeautifulSoup(html_content, "html.parser")
+        return json.loads(soup.find("script", type="application/json").string)
 
     @staticmethod
     def search(query_dict):
@@ -65,10 +65,9 @@ class Marmiton(object):
         """
         Returns every ingredients needed for a recipe
         """
-        for ingredientGroup in recipe['ingredientGroups']:
-            for ingredient in ingredientGroup['items']:
-                yield ingredient['name']
-        
+        for ingredientGroup in recipe["ingredientGroups"]:
+            for ingredient in ingredientGroup["items"]:
+                yield ingredient["name"]
 
     @staticmethod
     def recipes_url(url):
@@ -86,16 +85,16 @@ class Marmiton(object):
                 raise RecipeNotFound if e.code == 404 else e
             except urllib.error.URLError:
                 sleep(10)
-        soup = BeautifulSoup(html_content, 'html.parser')        
-        recipes = soup.find_all("a", {"class":"recipe-card-link"})
-        return map(lambda recipe: recipe['href'], recipes)
+        soup = BeautifulSoup(html_content, "html.parser")
+        recipes = soup.find_all("a", {"class": "recipe-card-link"})
+        return map(lambda recipe: recipe["href"], recipes)
 
     @staticmethod
     def extract_recipe(query_result):
         """
         Returns recipe json from page query (get)
         """
-        return query_result['props']['pageProps']['recipeData']['recipe']
+        return query_result["props"]["pageProps"]["recipeData"]["recipe"]
 
     @staticmethod
     def extract_recipes(query_result):
@@ -103,9 +102,9 @@ class Marmiton(object):
         Returns every recipes json from search query (search)
         """
         recipes = []
-        results = query_result['props']['pageProps']['searchResults']['hits']
+        results = query_result["props"]["pageProps"]["searchResults"]["hits"]
         for result in results:
-            if result['contentType'] == "RECIPE":
+            if result["contentType"] == "RECIPE":
                 recipes.append(result)
         return recipes
 
@@ -114,17 +113,36 @@ class Marmiton(object):
         """
         Get every existing Marmiton recipes
         """
+        from rich.progress import (
+            BarColumn,
+            MofNCompleteColumn,
+            Progress,
+            SpinnerColumn,
+            TextColumn,
+        )
+
+        progress = Progress(
+            SpinnerColumn(),
+            BarColumn(bar_width=60),
+            MofNCompleteColumn(),
+            TextColumn("recipes scrapped\n"),
+        )
+        progress.start()
+
         i = 0
         done = False
         while not done:
             done = True
             i += 1
+            print(i)
             uri = f"?type=platprincipal&page={i}"
-            for url in Marmiton.recipes_url(uri):
+            for url in progress.track(Marmiton.recipes_url(uri), total=30):
                 done = False
                 query_result = Marmiton.get(url)
                 recipe = Marmiton.extract_recipe(query_result)
                 yield recipe
+
+        progress.stop()
 
     @staticmethod
     def simplified_json(recipe):
@@ -144,9 +162,3 @@ class Marmiton(object):
             "title": recipe['title'],
             }
         }
-
-
-
-
-
-
