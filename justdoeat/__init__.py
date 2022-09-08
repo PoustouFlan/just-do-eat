@@ -15,20 +15,19 @@ class Justdoeat(object):
         i = 0
         for recipe in Marmiton.all_recipe():
             i += 1
-            ingredients = list(Marmiton.ingredients(recipe))
-            yield (recipe['url'], ingredients)
+            yield Marmiton.simplified_json(recipe)
             if i >= n:
                 break
 
     @staticmethod
     def save_recipes(filename, n = float('inf')):
-        for url, ingredients in Justdoeat.get_recipes(n):
+        for recipe in Justdoeat.get_recipes(n):
             system(f"cp {filename} {filename}.back")
             try:
-                save = load(filename)
+                save = Justdoeat.load(filename)
             except FileNotFoundError:
                 save = {}
-            save[url] = ingredients
+            save.update(recipe)
             pickle_dump(save, open(filename, 'wb'))
 
     @staticmethod

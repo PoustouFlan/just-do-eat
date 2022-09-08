@@ -33,7 +33,7 @@ ingredients = (
     'crème',
 )
 print("Toutes les recettes que vous pouvez faire en n'utilisant seulement ces"
-      "ingrédients:", ', '.join(ingredients))
+      " ingrédients:", ', '.join(ingredients))
 for url in Justdoeat.uses_only(save, ingredients):
     print(Marmiton.title_of_url(url))
 print()
@@ -47,10 +47,10 @@ print("Toutes les recettes qui utilisent chacun de ces ingrédients:",
         ', '.join(ingredients))
 for url in Justdoeat.uses(save, ingredients):
     print(Marmiton.title_of_url(url))
+print()
 
-print("10 recettes qui ne nécessiteraient pas beaucoup d'achats"
+print("7 recettes qui ne nécessiteraient pas beaucoup d'achats"
         " supplémentaires")
 for url in Justdoeat.minimum_buy(save, ingredients, 10):
     print(Marmiton.title_of_url(url))
-print()
 ```

@@ -133,6 +133,25 @@ class Marmiton(object):
         recipe = Marmiton.extract_recipe(query_result)
         return recipe['title']
 
+    @staticmethod
+    def simplified_json(recipe):
+        url = recipe['url']
+        ingredients = list(Marmiton.ingredients(recipe))
+        return {
+            url: {
+            "ingredients": ingredients,
+            "isGlutenFree": recipe['isGlutenFree'],
+            "isLactoseFree": recipe['isLactoseFree'],
+            "isVegetarian": recipe['isVegetarian'],
+            "isVegan": recipe['isVegan'],
+            "isPorkFree": recipe['isPorkFree'],
+            "isSweet": recipe['isSweet'],
+            "isSalty": recipe['isSalty'],
+            }
+        }
+
+
+
 
 
 
