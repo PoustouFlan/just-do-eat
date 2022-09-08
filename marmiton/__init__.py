@@ -7,6 +7,7 @@ import urllib.request
 
 import re
 import json
+from time import sleep
 
 
 class RecipeNotFound(Exception):
@@ -20,10 +21,15 @@ class Marmiton(object):
         """
         Get json from Marmiton url
         """
-        try:
-            html_content = urllib.request.urlopen(url).read()
-        except urllib.error.HTTPError as e:
-            raise RecipeNotFound if e.code == 404 else e
+        done = False
+        while not done:
+            try:
+                html_content = urllib.request.urlopen(url).read()
+                done = True
+            except urllib.error.HTTPError as e:
+                raise RecipeNotFound if e.code == 404 else e
+            except urllib.error.URLError:
+                sleep(10)
         soup = BeautifulSoup(html_content, 'html.parser')        
         return json.loads(soup.find('script', type='application/json').string)
 
@@ -71,10 +77,15 @@ class Marmiton(object):
         """
         base_url = "https://www.marmiton.org/recettes"
         url = base_url + url
-        try:
-            html_content = urllib.request.urlopen(url).read()
-        except urllib.error.HTTPError as e:
-            raise RecipeNotFound if e.code == 404 else e
+        done = False
+        while not done:
+            try:
+                html_content = urllib.request.urlopen(url).read()
+                done = True
+            except urllib.error.HTTPError as e:
+                raise RecipeNotFound if e.code == 404 else e
+            except urllib.error.URLError:
+                sleep(10)
         soup = BeautifulSoup(html_content, 'html.parser')        
         recipes = soup.find_all("a", {"class":"recipe-card-link"})
         return map(lambda recipe: recipe['href'], recipes)
