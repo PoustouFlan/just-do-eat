@@ -3,5 +3,5 @@ from recettes.models import Recipe
 
 
 @admin.register(Recipe)
-class RecipyAdmin(admin.ModelAdmin):
+class RecipeAdmin(admin.ModelAdmin):
     pass
