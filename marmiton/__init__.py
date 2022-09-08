@@ -89,18 +89,17 @@ class Marmiton(object):
 
     @staticmethod
     def all_recipe():
-        i = 1
-        while True:
-            print(i)
+        i = 930
+        done = False
+        while not done:
+            done = True
             i += 1
-            try:
-                uri = f"?type=platprincipal&page={i}"
-                for url in Marmiton.recipes_url(uri):
-                    query_result = Marmiton.get(url)
-                    recipe = Marmiton.extract_recipe(query_result)
-                    yield recipe
-            except RecipeNotFound:
-                break
+            uri = f"?type=platprincipal&page={i}"
+            for url in Marmiton.recipes_url(uri):
+                done = False
+                query_result = Marmiton.get(url)
+                recipe = Marmiton.extract_recipe(query_result)
+                yield recipe
 
 
 
