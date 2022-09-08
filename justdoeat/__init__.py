@@ -33,6 +33,9 @@ class Justdoeat(object):
 
     @staticmethod
     def uses_only(save, ingredients):
+        """
+        Yields every recipes that uses only some ingredients
+        """
         for url, using in save.items():
             for ingredient in using:
                 if ingredient not in ingredients:
@@ -41,7 +44,22 @@ class Justdoeat(object):
                 yield url
 
     @staticmethod
+    def uses(save, ingredients):
+        """
+        Yields every recipes that uses each of the required ingredients
+        """
+        for url, using in save.items():
+            for ingredient in ingredients:
+                if ingredient not in using:
+                    break
+            else:
+                yield url
+
+    @staticmethod
     def random_recipes(save, n=1):
+        """
+        Yields n random recipes
+        """
         save = list(save.items())
         max_bound = len(save) - 1
         indices = set()
