@@ -6,7 +6,8 @@ filtered = Justdoeat.filter(save, isVegan=True)
 
 print("3 recettes végan aléatoires :")
 for url in Justdoeat.random_recipes(filtered, 3):
-    print(Marmiton.title_of_url(url))
+    recipe = filtered[url]
+    print(recipe['title'])
 print()
 
 ingredients = (
@@ -29,7 +30,8 @@ ingredients = (
 print("Toutes les recettes que vous pouvez faire en utilisant seulement ces"
       " ingrédients:", ', '.join(ingredients))
 for url in Justdoeat.uses_only(save, ingredients):
-    print(Marmiton.title_of_url(url))
+    recipe = save[url]
+    print(recipe['title'])
 print()
 
 ingredients = (
@@ -40,11 +42,13 @@ ingredients = (
 print("Toutes les recettes qui utilisent chacun de ces ingrédients:",
         ', '.join(ingredients))
 for url in Justdoeat.uses(save, ingredients):
-    print(Marmiton.title_of_url(url))
+    recipe = save[url]
+    print(recipe['title'])
 print()
 
 filtered = Justdoeat.filter(save, isPorkFree=True)
 print("7 recettes sans porc qui ne nécessiteraient pas beaucoup d'achats"
         " supplémentaires")
-for url in Justdoeat.minimum_buy(save, ingredients, 7):
-    print(Marmiton.title_of_url(url))
+for url in Justdoeat.minimum_buy(filtered, ingredients, 7):
+    recipe = filtered[url]
+    print(recipe['title'])

@@ -127,15 +127,9 @@ class Marmiton(object):
                 yield recipe
 
     @staticmethod
-    def title_of_url(url):
-        url = "https://www.marmiton.org" + url
-        query_result = Marmiton.get(url)
-        recipe = Marmiton.extract_recipe(query_result)
-        return recipe['title']
-
-    @staticmethod
     def simplified_json(recipe):
         url = recipe['url']
+
         ingredients = list(Marmiton.ingredients(recipe))
         return {
             url: {
@@ -147,6 +141,7 @@ class Marmiton(object):
             "isPorkFree": recipe['isPorkFree'],
             "isSweet": recipe['isSweet'],
             "isSalty": recipe['isSalty'],
+            "title": recipe['title'],
             }
         }
 
