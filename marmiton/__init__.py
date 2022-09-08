@@ -89,7 +89,7 @@ class Marmiton(object):
 
     @staticmethod
     def all_recipe():
-        i = 930
+        i = 0
         done = False
         while not done:
             done = True
