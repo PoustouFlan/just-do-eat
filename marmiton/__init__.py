@@ -10,109 +10,97 @@ import json
 
 
 class RecipeNotFound(Exception):
-	pass
+    pass
 
 
 class Marmiton(object):
 
-	@staticmethod
-	def search(query_dict):
-		"""
-		Search recipes parsing the returned html data.
-		Options:
-		'aqt': string of keywords separated by a white space  (query search)
-		Optional options :
-		'dt': "entree" | "platprincipal" | "accompagnement" | "amusegueule" | "sauce"  (plate type)
-		'exp': 1 | 2 | 3  (plate expense 1: cheap, 3: expensive)
-		'dif': 1 | 2 | 3 | 4  (recipe difficultie 1: easy, 4: advanced)
-		'veg': 0 | 1  (vegetarien only: 1)
-		'rct': 0 | 1  (without cook: 1)
-		'sort': "markdesc" (rate) | "popularitydesc" (popularity) | "" (empty for relevance)
-		"""
-		base_url = "https://www.marmiton.org/recettes/recherche.aspx?"
-		query_url = urllib.parse.urlencode(query_dict)
-		url = base_url + query_url
-		html_content = urllib.request.urlopen(url).read()
-		soup = BeautifulSoup(html_content, 'html.parser')		
-		return json.loads(soup.find('script', type='application/json').string)
+    @staticmethod
+    def get(url):
+        try:
+            html_content = urllib.request.urlopen(url).read()
+        except urllib.error.httperror as e:
+            raise RecipeNotFound if e.code == 404 else e
+        soup = BeautifulSoup(html_content, 'html.parser')        
+        return json.loads(soup.find('script', type='application/json').string)
 
-	@staticmethod
-	def __clean_text(element):
-		return element.text.replace("\n", "").strip()
+    @staticmethod
+    def search(query_dict):
+        """
+        Search recipes parsing the returned html data.
+        Options:
+        'aqt': string of keywords separated by a white space  (query search)
+        Optional options :
+        'dt': "entree" | "platprincipal" | "accompagnement" | "amusegueule" | "sauce"  (plate type)
+        'exp': 1 | 2 | 3  (plate expense 1: cheap, 3: expensive)
+        'dif': 1 | 2 | 3 | 4  (recipe difficultie 1: easy, 4: advanced)
+        'veg': 0 | 1  (vegetarien only: 1)
+        'rct': 0 | 1  (without cook: 1)
+        'sort': "markdesc" (rate) | "popularitydesc" (popularity) | "" (empty for relevance)
+        """
+        base_url = "https://www.marmiton.org/recettes/recherche.aspx?"
+        query_url = urllib.parse.urlencode(query_dict)
+        url = base_url + query_url
+        return Marmiton.get(url)
 
-	@staticmethod
-	def get(uri):
-		"""
-		'url' from 'search' method.
-		 ex. "/recettes/recette_wraps-de-poulet-et-sauce-au-curry_337319.aspx"
-		"""
-		data = {}
+    @staticmethod
+    def ingredients(recipe):
+        """
+        Returns every ingredients needed for a recipe
+        """
+        for ingredientGroup in recipe['ingredientGroups']:
+            for ingredient in ingredientGroup['items']:
+                yield ingredient['token']
+        
 
-		base_url = "http://www.marmiton.org"
-		url = base_url + ("" if uri.startswith("/") else "/") + uri
+    @staticmethod
+    def recipes_url(url):
+        """
+        Returns urls of every recipe proposed in the page
+        """
+        base_url = "https://www.marmiton.org/recettes"
+        url = base_url + url
+        try:
+            html_content = urllib.request.urlopen(url).read()
+        except urllib.error.HTTPError as e:
+            raise RecipeNotFound if e.code == 404 else e
+        soup = BeautifulSoup(html_content, 'html.parser')        
+        recipes = soup.find_all("a", {"class":"recipe-card-link"})
+        return map(lambda recipe: recipe['href'], recipes)
 
-		try:
-			html_content = urllib.request.urlopen(url).read()
-		except urllib.error.HTTPError as e:
-			raise RecipeNotFound if e.code == 404 else e
+    @staticmethod
+    def extract_recipe(query_result):
+        """
+        Returns recipe json from page query (get)
+        """
+        return query_result['props']['pageProps']['recipeData']['recipe']
 
-		soup = BeautifulSoup(html_content, 'html.parser')
+    @staticmethod
+    def extract_recipes(query_result):
+        """
+        Returns every recipes json from search query (search)
+        """
+        recipes = []
+        results = query_result['props']['pageProps']['searchResults']['hits']
+        for result in results:
+            if result['contentType'] == "RECIPE":
+                recipes.append(result)
+        return recipes
 
-		main_data = soup.find("div", {"class": "m_content_recette_main"})
-		try:
-			name = soup.find("h1", {"class", "main-title "}).get_text().strip(' \t\n\r')
-		except:
-			name = soup.find("h1", {"class", "main-title"}).get_text().strip(' \t\n\r')
+    @staticmethod
+    def all_recipe():
+        i = 1
+        while True:
+            print(i)
+            i += 1
+            try:
+                uri = f"?type=platprincipal&page={i}"
+                for url in Marmiton.recipes_url(uri):
+                    query_result = Marmiton.get(url)
+                    recipe = Marmiton.extract_recipe(query_result)
+                    yield recipe
+            except RecipeNotFound:
+                break
 
-		ingredients = [item.text.replace("\n", "").strip() for item in soup.find_all("li", {"class": "recipe-ingredients__list__item"})]
 
-		try:
-			tags = list(set([item.text.replace("\n", "").strip() for item in soup.find('ul', {"class": "mrtn-tags-list"}).find_all('li', {"class": "mrtn-tag"})]))
-		except:
-			tags = []
-
-		recipe_elements = [
-			{"name": "author", "query": soup.find('span', {"class": "recipe-author__name"})},
-			{"name": "rate","query": soup.find("span", {"class": "recipe-reviews-list__review__head__infos__rating__value"})},
-			{"name": "difficulty", "query": soup.find("div", {"class": "recipe-infos__level"})},
-			{"name": "budget", "query": soup.find("div", {"class": "recipe-infos__budget"})},
-			{"name": "prep_time", "query": soup.find("span", {"class": "recipe-infos__timmings__value"})},
-			{"name": "total_time", "query": soup.find("span", {"class": "title-2 recipe-infos__total-time__value"})},
-			{"name": "people_quantity", "query": soup.find("span", {"class": "title-2 recipe-infos__quantity__value"})},
-			{"name": "author_tip", "query": soup.find("div", {"class": "recipe-chief-tip mrtn-recipe-bloc "}).find("p", {"class": "mrtn-recipe-bloc__content"}) if soup.find("div", {"class": "recipe-chief-tip mrtn-recipe-bloc "}) else "" },
-		]
-		for recipe_element in recipe_elements:
-			try:
-				data[recipe_element['name']] = Marmiton.__clean_text(recipe_element['query'])
-			except:
-				data[recipe_element['name']] = ""
-
-		try:
-			cook_time = Marmiton.__clean_text(soup.find("div", {"class": "recipe-infos__timmings__cooking"}).find("span"))
-		except:
-			cook_time = "0"
-
-		try:
-			nb_comments = Marmiton.__clean_text(soup.find("span", {"class": "recipe-infos-users__value mrtn-hide-on-print"})).split(" ")[0]
-		except:
-			nb_comments = ""
-
-		steps = []
-		soup_steps = soup.find_all("li", {"class": "recipe-preparation__list__item"})
-		for soup_step in soup_steps:
-			steps.append(Marmiton.__clean_text(soup_step))
-
-		image = soup.find("img", {"id": "af-diapo-desktop-0_img"})['src'] if soup.find("img", {"id": "af-diapo-desktop-0_img"}) else ""
-
-		data.update({
-			"ingredients": ingredients,
-			"steps": steps,
-			"name": name,
-			"tags": tags,
-			"image": image if image else "",
-			"nb_comments": nb_comments,
-			"cook_time": cook_time
-		})
-
-		return data
 
