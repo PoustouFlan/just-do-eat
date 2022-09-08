@@ -1,8 +1,14 @@
 from marmiton import Marmiton
+from random import randint
 from pickle import load as pickle_load, dump as pickle_dump
 from os import system
 
 class Justdoeat(object):
+
+    @staticmethod
+    def load(filename):
+        save = pickle_load(open(filename, 'rb'))
+        return save
 
     @staticmethod
     def get_recipes(n = float('inf')):
@@ -35,7 +41,15 @@ class Justdoeat(object):
                 yield url
 
     @staticmethod
-    def load(filename):
-        save = pickle_load(open(filename, 'rb'))
-        return save
+    def random_recipes(save, n=1):
+        save = list(save.items())
+        max_bound = len(save) - 1
+        indices = set()
+        while len(indices) < n:
+            i = randint(0, max_bound)
+            if i in indices:
+                continue
+            url = save[i][0]
+            yield url
+            indices.add(url)
 

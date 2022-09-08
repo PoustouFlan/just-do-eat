@@ -126,5 +126,13 @@ class Marmiton(object):
                 recipe = Marmiton.extract_recipe(query_result)
                 yield recipe
 
+    @staticmethod
+    def title_of_url(url):
+        url = "https://www.marmiton.org" + url
+        query_result = Marmiton.get(url)
+        recipe = Marmiton.extract_recipe(query_result)
+        return recipe['title']
+
+
 
 

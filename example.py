@@ -3,6 +3,11 @@ from marmiton import Marmiton
 
 save = Justdoeat.load("data/save.p")
 
+print("10 recettes aléatoires :")
+for url in Justdoeat.random_recipes(save, 10):
+    print(Marmiton.title_of_url(url))
+print()
+
 ingredients = (
     'beurre',
     'sel',
@@ -20,9 +25,7 @@ ingredients = (
     'pomme de terre',
     'crème',
 )
-
+print("Toutes les recettes que vous pouvez faire en n'utilisant seulement ces"
+      "ingrédients:", ', '.join(ingredients))
 for url in Justdoeat.uses_only(save, ingredients):
-    url = "https://www.marmiton.org" + url
-    query_result = Marmiton.get(url)
-    recipe = Marmiton.extract_recipe(query_result)
-    print(recipe['title'])
+    print(Marmiton.title_of_url(url))
