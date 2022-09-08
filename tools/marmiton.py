@@ -165,5 +165,6 @@ class Marmiton(object):
                 "isPorkFree": recipe["isPorkFree"],
                 "isSweet": recipe["isSweet"],
                 "isSalty": recipe["isSalty"],
+                "title": recipe["title"],
             }
         }
