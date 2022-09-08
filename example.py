@@ -1,5 +1,5 @@
-from justdoeat import Justdoeat
-from marmiton import Marmiton
+from tools.justdoeat import Justdoeat
+from tools.marmiton import Marmiton
 
 save = Justdoeat.load("data/save.p")
 filtered = Justdoeat.filter(save, isVegan=True)
