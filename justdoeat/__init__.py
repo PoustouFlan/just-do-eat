@@ -1,5 +1,5 @@
 from marmiton import Marmiton
-from pickle import load, dump
+from pickle import load as pickle_load, dump as pickle_dump
 from os import system
 
 class Justdoeat(object):
@@ -19,9 +19,23 @@ class Justdoeat(object):
         for url, ingredients in Justdoeat.get_recipes(n):
             system(f"cp {filename} {filename}.back")
             try:
-                save = load(open(filename, 'rb'))
+                save = load(filename)
             except FileNotFoundError:
                 save = {}
             save[url] = ingredients
-            dump(save, open(filename, 'wb'))
+            pickle_dump(save, open(filename, 'wb'))
+
+    @staticmethod
+    def uses_only(save, ingredients):
+        for url, using in save.items():
+            for ingredient in using:
+                if ingredient not in ingredients:
+                    break
+            else:
+                yield url
+
+    @staticmethod
+    def load(filename):
+        save = pickle_load(open(filename, 'rb'))
+        return save
 
