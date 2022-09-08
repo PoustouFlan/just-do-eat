@@ -98,5 +98,19 @@ class Justdoeat(object):
             for ingredient in save[best]:
                 if ingredient not in ingredients and ingredient not in bought:
                     bought.append(ingredient)
+
+    @staticmethod
+    def filter(save, **criterias):
+        filtered = {}
+        for url, recipe in save.items():
+            if type(recipe) == list:
+                continue
+            for criteria, value in criterias.items():
+                if recipe[criteria] != value:
+                    break
+            else:
+                filtered[url] = recipe
+        return filtered
+
         
 

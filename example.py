@@ -2,6 +2,7 @@ from justdoeat import Justdoeat
 from marmiton import Marmiton
 
 save = Justdoeat.load("data/save.p")
+save = Justdoeat.filter(save, isVegan=True)
 
 print("3 recettes aléatoires :")
 for url in Justdoeat.random_recipes(save, 3):
