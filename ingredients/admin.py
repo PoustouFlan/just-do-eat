@@ -35,6 +35,7 @@ class PossessedIngredientAdmin(admin.ModelAdmin):
 
     actions = ("get_uses_only",)
     autocomplete_fields = ("ingredient",)
+    list_filter = ("expire_date",)
 
     @admin.action(description="Recettes possibles en utilisant seulement ces ingrédients")
     def get_uses_only(self, request: HttpRequest, queryset: QuerySet):
